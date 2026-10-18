@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>マイツールハブ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.383.0/dist/umd/lucide.min.js"></script>
+<style>
+:root{
+  --bg:#ECEEF5; --surface:#FFFFFF; --surface2:#F4F5FA; --text:#151A2D; --muted:#5E6582; --border:#D9DCE8;
+  --accent:#4F46E5; --accent-2:#EEF0FF; --on-accent:#FFFFFF; --danger:#D23B3B;
+  --tile-l:92%; --tile-fg-l:36%; --shadow:0 10px 28px -12px rgba(30,35,80,.28);
+  color-scheme:light; box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0D1120; --surface:#161B2E; --surface2:#1D2338; --text:#E7E9F5; --muted:#9298B4; --border:#2A3150;
+    --accent:#8F8CFF; --accent-2:#25264A; --on-accent:#10122A; --danger:#FF7B7B;
+    --tile-l:22%; --tile-fg-l:78%; --shadow:0 12px 30px -12px rgba(0,0,0,.7); color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0D1120; --surface:#161B2E; --surface2:#1D2338; --text:#E7E9F5; --muted:#9298B4; --border:#2A3150;
+  --accent:#8F8CFF; --accent-2:#25264A; --on-accent:#10122A; --danger:#FF7B7B;
+  --tile-l:22%; --tile-fg-l:78%; --shadow:0 12px 30px -12px rgba(0,0,0,.7); color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{margin:0}
+body{background:var(--bg);color:var(--text);font-family:"IBM Plex Sans JP","Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic UI",Meiryo,sans-serif;font-size:15px;line-height:1.6;min-height:100%}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+[hidden]{display:none!important}
+.wrap{max-width:1180px;margin:0 auto;padding:22px 18px 60px}
+svg.lucide{width:1em;height:1em;flex:none}
+
+/* header */
+.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+.brand{display:flex;align-items:center;gap:10px}
+.brand .mark{width:34px;height:34px;border-radius:10px;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;font-size:18px}
+.brand h1{margin:0;font-size:19px;font-weight:700}
+.top .tools{display:flex;gap:6px}
+.iconbtn{width:38px;height:38px;border-radius:10px;border:1px solid var(--border);background:var(--surface);display:grid;place-items:center;font-size:17px;color:var(--muted)}
+.iconbtn:hover{color:var(--text);border-color:var(--muted)}
+
+/* command bar */
+.command{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:8px;display:grid;gap:8px;box-shadow:var(--shadow)}
+.searchrow{display:flex;align-items:center;gap:10px;padding:6px 10px}
+.searchrow .ic{font-size:22px;color:var(--accent);display:flex}
+.searchrow input{flex:1;min-width:0;border:0;background:transparent;font-size:20px;font-weight:500;outline:none;padding:6px 0}
+.searchrow input::placeholder{color:var(--muted);font-weight:400}
+.kbd{font-size:12px;color:var(--muted);border:1px solid var(--border);border-radius:6px;padding:1px 7px}
+.addrow{display:flex;gap:8px;background:var(--surface2);border-radius:12px;padding:6px}
+.addrow input{flex:1;min-width:0;border:0;background:transparent;padding:8px 10px;outline:none;font-size:15px}
+.btn{border:1px solid var(--border);background:var(--surface);border-radius:10px;padding:8px 14px;font-weight:500;font-size:14px;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--on-accent);font-weight:600}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.danger{color:var(--danger)}
+.btn.danger:hover{border-color:var(--danger)}
+
+/* tabs */
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:16px 2px 4px;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{border:1px solid transparent;background:transparent;border-radius:999px;padding:6px 14px;font-size:14px;color:var(--muted);white-space:nowrap;display:inline-flex;gap:6px;align-items:center}
+.tab:hover{color:var(--text)}
+.tab .c{font-size:12px;opacity:.7}
+.tab[aria-selected="true"]{background:var(--text);color:var(--surface)}
+.tab.edit{border:1px dashed var(--border)}
+
+/* sections */
+.sec{margin-top:24px}
+.sec-h{display:flex;align-items:center;gap:10px;margin:0 2px 10px}
+.sec-h h2{font-size:16px;margin:0;font-weight:700}
+.sec-h .cnt{font-size:12px;color:var(--muted);background:var(--surface);border:1px solid var(--border);border-radius:999px;padding:0 8px}
+.sec-h .line{flex:1;height:1px;background:var(--border)}
+.sec-h .btn{padding:4px 10px;font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:12px;border-radius:14px;min-height:20px}
+.grid.drop-end{outline:2px dashed var(--accent);outline-offset:4px}
+.empty{grid-column:1/-1;border:1.5px dashed var(--border);border-radius:14px;padding:18px;text-align:center;color:var(--muted);font-size:14px}
+
+/* card */
+.card{position:relative;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px;display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:start;transition:transform .18s ease,box-shadow .18s ease,border-color .18s}
+.card:hover,.card:focus-within{transform:translateY(-3px);box-shadow:var(--shadow);border-color:color-mix(in srgb,var(--accent) 45%,var(--border))}
+.card .cover{position:absolute;inset:0;border-radius:14px;z-index:1}
+.card .body{min-width:0}
+.card h3{margin:0;font-size:15px;font-weight:600;line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:4px}
+.card p{margin:3px 0 6px;font-size:13px;color:var(--muted);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.9em}
+.card .host{font-size:12px;color:var(--muted);opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:4px}
+.acts{position:absolute;top:8px;right:8px;z-index:2;display:flex;gap:2px;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:2px;opacity:0;transition:opacity .15s}
+.card:hover .acts,.card:focus-within .acts{opacity:1}
+@media (hover:none){.acts{opacity:1;position:static;grid-column:1/-1;justify-self:end;margin-top:-4px}}
+.acts button{width:28px;height:28px;border:0;background:transparent;border-radius:7px;display:grid;place-items:center;color:var(--muted);font-size:15px}
+.acts button:hover{background:var(--surface2);color:var(--text)}
+.acts .handle{cursor:grab;touch-action:none}
+.card.dragging{opacity:.35}
+.card.drop-before::before,.card.drop-after::after{content:"";position:absolute;top:6px;bottom:6px;width:4px;border-radius:2px;background:var(--accent);z-index:3}
+.card.drop-before::before{left:-9px}
+.card.drop-after::after{right:-9px}
+.ghost{position:fixed;z-index:50;pointer-events:none;transform:rotate(2deg);box-shadow:var(--shadow);opacity:.95}
+
+/* tiles */
+.tile{--h:240;width:46px;height:46px;border-radius:12px;display:grid;place-items:center;background:hsl(var(--h) 70% var(--tile-l));color:hsl(var(--h) 60% var(--tile-fg-l));font-size:22px;font-weight:700;overflow:hidden;flex:none}
+.tile img{width:30px;height:30px;object-fit:contain}
+.tile i{font-style:normal}
+.tile .fb{display:grid;place-items:center}
+.tile.fav{background:var(--surface2)}
+.tile.lg{width:56px;height:56px;font-size:28px;border-radius:14px}
+.tile.lg img{width:36px;height:36px}
+
+/* modal */
+.overlay{position:fixed;inset:0;background:rgba(8,10,25,.5);z-index:40;display:none;align-items:center;justify-content:center;padding:16px;padding-top:calc(16px + env(safe-area-inset-top,0px));padding-bottom:calc(16px + env(safe-area-inset-bottom,0px))}
+.overlay.open{display:flex}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:18px;width:100%;max-width:560px;max-height:100%;overflow:auto;padding:20px}
+.panel h2{margin:0 0 14px;font-size:18px}
+.f{margin-bottom:12px}
+.f label{display:block;font-size:13px;color:var(--muted);margin-bottom:4px;font-weight:500}
+.in{width:100%;border:1px solid var(--border);background:var(--surface2);border-radius:10px;padding:9px 12px;font-size:15px;outline:none}
+.in:focus{border-color:var(--accent)}
+textarea.in{resize:vertical;min-height:64px;line-height:1.5}
+.urlrow{display:flex;gap:8px}
+.note{font-size:12px;color:var(--muted);margin-top:4px}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:12px;border-radius:999px;padding:1px 9px;background:var(--accent-2);color:var(--accent);font-weight:600;margin-left:6px}
+.iconpick{display:flex;gap:14px;align-items:flex-start}
+.icgrid{display:flex;flex-wrap:wrap;gap:6px}
+.ico{width:40px;height:40px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface2);display:grid;place-items:center;font-size:19px;color:var(--text)}
+.ico:hover{border-color:var(--muted)}
+.ico[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-2);color:var(--accent)}
+.ico.favopt{width:auto;padding:0 10px;font-size:13px;gap:6px;display:inline-flex;align-items:center}
+.linkbtn{border:0;background:none;color:var(--accent);padding:0;font-size:13px;margin-top:8px}
+.foot{display:flex;gap:8px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap}
+.foot .sp{flex:1}
+.catrow{display:flex;gap:6px;align-items:center;margin-bottom:8px}
+.catrow .in{flex:1}
+.catrow .ico{width:36px;height:36px;font-size:16px}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--text);color:var(--surface);padding:9px 16px;border-radius:999px;font-size:14px;z-index:60;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90vw}
+.toast.show{opacity:1;pointer-events:auto}
+.toast button{margin-left:14px;border:0;background:transparent;color:inherit;font-weight:700;text-decoration:underline;padding:0}
+.btn:disabled,.in:disabled{opacity:.45;cursor:default}
+.btn[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.card .sel{display:none;position:absolute;left:-7px;top:-7px;z-index:2;width:22px;height:22px;margin:0;accent-color:var(--accent);cursor:pointer}
+body.editing .card .sel{display:block}
+body.editing .card .cover{display:none}
+body.editing .card{cursor:pointer;border-style:dashed}
+body.editing .card:hover{transform:none}
+body.editing .acts{opacity:1}
+.card.selected{border-style:solid;border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.selbar{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--surface);border-top:1px solid var(--border);padding:10px 16px;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px));display:none}
+body.editing .selbar{display:block}
+body.editing .wrap{padding-bottom:130px}
+body.editing .toast{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+.selbar-in{max-width:1180px;margin:0 auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.selbar .info{font-size:14px;color:var(--muted);flex:1;min-width:180px}
+.selbar select.in{width:auto;padding:7px 10px;font-size:14px}
+.noresult{text-align:center;color:var(--muted);padding:40px 0}
+@media (max-width:560px){
+  .searchrow input{font-size:17px}
+  .kbd{display:none}
+  .grid{grid-template-columns:1fr}
+  .addrow{flex-wrap:wrap}
+  .addrow .btn{flex:1;justify-content:center}
+}
+@media (prefers-reduced-motion:reduce){.card,.card:hover{transition:none;transform:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="brand"><span class="mark"><i data-lucide="layout-grid">▦</i></span><h1>マイツールハブ</h1></div>
+    <div class="tools">
+      <button class="btn" id="editBtn" aria-pressed="false" title="リンクの編集・削除をまとめて行う"><i data-lucide="pencil">✎</i>編集</button>
+      <button class="iconbtn" id="backupBtn" aria-label="バックアップ・復元" title="バックアップ・復元"><i data-lucide="archive">⇅</i></button>
+      <button class="iconbtn" id="themeBtn" aria-label="表示テーマを切り替え" title="表示テーマ"></button>
+    </div>
+  </div>
+
+  <div class="command">
+    <div class="searchrow">
+      <span class="ic"><i data-lucide="search">⌕</i></span>
+      <input id="q" type="search" placeholder="ツールを検索（名前・説明・URL）" autocomplete="off" aria-label="ツールを検索">
+      <span class="kbd">/</span>
+    </div>
+    <div class="addrow">
+      <input id="addUrl" type="url" inputmode="url" placeholder="URLを貼り付けて追加（例: https://zenn.dev / localhost:5173）" aria-label="追加するURL">
+      <button class="btn primary" id="addBtn"><i data-lucide="wand-2">＋</i>自動取得して追加</button>
+    </div>
+  </div>
+
+  <div class="tabs" id="tabs" role="tablist"></div>
+  <main id="main"></main>
+</div>
+
+<div class="overlay" id="overlay" role="dialog" aria-modal="true"><div class="panel" id="panel"></div></div>
+<div class="toast" id="toast" role="status"></div>
+<div class="selbar" id="selbar" aria-label="編集モード"><div class="selbar-in">
+  <span class="info" id="selInfo"></span>
+  <select class="in" id="selMove" aria-label="選択したリンクをカテゴリへ移動"></select>
+  <button class="btn" id="selAll" type="button">表示中をすべて選択</button>
+  <button class="btn danger" id="selDel" type="button"><i data-lucide="trash-2">✕</i>まとめて削除</button>
+  <button class="btn primary" id="editDone" type="button">完了</button>
+</div></div>
+
+<script>
+(function(){
+const KEY='toolHub.v1';
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(-3);
+
+/* ---------- knowledge ---------- */
+const CAT_NAMES={self:'自作ツール',work:'業務・開発ハブ',daily:'日常・ユーティリティ',learn:'情報収集・学習'};
+const KNOWN={
+  'google.com':['Google','Web検索エンジン','learn','search'],
+  'mail.google.com':['Gmail','メールの送受信・管理','work','mail'],
+  'drive.google.com':['Google ドライブ','ファイルの保存・共有','work','folder'],
+  'docs.google.com':['Google ドキュメント','文書・スプレッドシートの作成と共同編集','work','file-text'],
+  'calendar.google.com':['Google カレンダー','予定・スケジュール管理','daily','calendar'],
+  'maps.google.com':['Google マップ','地図・ルート検索','daily','map'],
+  'translate.google.com':['Google 翻訳','多言語のテキスト翻訳','daily','languages'],
+  'gemini.google.com':['Gemini','GoogleのAIアシスタント','work','sparkles'],
+  'claude.ai':['Claude','AIアシスタント（文章作成・分析・コーディング）','work','sparkles'],
+  'chatgpt.com':['ChatGPT','OpenAIのAIチャット','work','bot'],
+  'chat.openai.com':['ChatGPT','OpenAIのAIチャット','work','bot'],
+  'perplexity.ai':['Perplexity','出典つきで答えるAI検索','learn','search'],
+  'github.com':['GitHub','コードのホスティングと共同開発','work','code'],
+  'gitlab.com':['GitLab','Gitリポジトリ管理とCI/CD','work','code'],
+  'stackoverflow.com':['Stack Overflow','プログラミングのQ&Aコミュニティ','learn','code'],
+  'qiita.com':['Qiita','エンジニア向けの技術記事','learn','book-open'],
+  'zenn.dev':['Zenn','エンジニア向けの技術記事・本','learn','book-open'],
+  'note.com':['note','記事・ブログの投稿と購読','learn','newspaper'],
+  'notion.so':['Notion','メモ・ドキュメント・データベース','work','notebook'],
+  'notion.com':['Notion','メモ・ドキュメント・データベース','work','notebook'],
+  'figma.com':['Figma','UIデザインとプロトタイプ作成','work','pen-tool'],
+  'canva.com':['Canva','画像・資料デザインの作成','work','palette'],
+  'slack.com':['Slack','チームのチャット・連絡','work','message-circle'],
+  'chatwork.com':['Chatwork','ビジネスチャット','work','message-circle'],
+  'trello.com':['Trello','かんばん方式のタスク管理','work','check-square'],
+  'asana.com':['Asana','プロジェクト・タスク管理','work','check-square'],
+  'dropbox.com':['Dropbox','クラウドストレージ','work','folder'],
+  'vercel.com':['Vercel','Webアプリのデプロイ・ホスティング','work','rocket'],
+  'netlify.com':['Netlify','Webサイトのデプロイ・ホスティング','work','rocket'],
+  'youtube.com':['YouTube','動画の視聴・学習','learn','video'],
+  'x.com':['X','SNS・最新情報のチェック','learn','message-circle'],
+  'twitter.com':['X','SNS・最新情報のチェック','learn','message-circle'],
+  'deepl.com':['DeepL 翻訳','高精度なAI翻訳','daily','languages'],
+  'amazon.co.jp':['Amazon','ネット通販','daily','shopping-cart'],
+  'rakuten.co.jp':['楽天市場','ネット通販','daily','shopping-cart'],
+  'mercari.com':['メルカリ','フリマアプリ','daily','shopping-cart'],
+  'yahoo.co.jp':['Yahoo! JAPAN','ニュース・検索ポータル','learn','newspaper'],
+  'wikipedia.org':['Wikipedia','オンライン百科事典','learn','book-open'],
+  'spotify.com':['Spotify','音楽ストリーミング','daily','music'],
+  'line.me':['LINE','メッセージ・通話','daily','message-circle'],
+  'tenki.jp':['tenki.jp','天気予報','daily','cloud-sun'],
+  'navitime.co.jp':['NAVITIME','乗換案内・ルート検索','daily','bus'],
+  'feedly.com':['Feedly','RSSリーダーで情報収集','learn','newspaper'],
+  'duolingo.com':['Duolingo','ゲーム感覚の語学学習','learn','graduation-cap'],
+};
+const RULES=[
+  {k:['shift','シフト','schedule','calendar','予定','カレンダー','スケジュール'],ic:['calendar-days','calendar','clock'],d:'シフトや予定を管理するツール',c:'daily'},
+  {k:['salary','pay','payroll','給与','給料','money','budget','家計','kakeibo','wallet','expense','finance','収支'],ic:['wallet','calculator','pie-chart'],d:'お金・家計を管理するツール',c:'daily'},
+  {k:['calc','calculator','計算','simulator','シミュレ'],ic:['calculator','bar-chart-3'],d:'計算・シミュレーションツール',c:'daily'},
+  {k:['text','テキスト','extract','extractor','抽出','ocr','pdf','文字','markdown','converter','変換'],ic:['file-text','clipboard-list','type'],d:'テキストを抽出・整形するツール',c:'work'},
+  {k:['task','tasks','todo','タスク','kanban','project','やること'],ic:['check-square','list-todo','clipboard-list'],d:'タスク・ToDoを管理するツール',c:'work'},
+  {k:['ai','bot','chat','gpt','llm','prompt','プロンプト','agent','assistant'],ic:['bot','sparkles','message-circle'],d:'AIを使ったチャット・自動化ツール',c:'work'},
+  {k:['code','dev','api','json','regex','git','deploy','sql','editor','playground','コード'],ic:['code','terminal','database'],d:'開発・コーディング用のツール',c:'work'},
+  {k:['image','photo','画像','img','resize','png','jpg','写真','icon'],ic:['image','camera','palette'],d:'画像を編集・変換するツール',c:'daily'},
+  {k:['timer','pomodoro','タイマー','stopwatch','集中'],ic:['timer','clock'],d:'時間を計る・集中するためのタイマー',c:'daily'},
+  {k:['note','notes','memo','メモ','diary','日記','journal','log'],ic:['notebook','sticky-note','pen-tool'],d:'メモ・記録をつけるツール',c:'daily'},
+  {k:['translate','translator','翻訳','language','english','英語'],ic:['languages','globe'],d:'翻訳・語学用のツール',c:'learn'},
+  {k:['quiz','study','learn','学習','勉強','flashcard','単語','暗記','english'],ic:['graduation-cap','book-open','lightbulb'],d:'学習・暗記を助けるツール',c:'learn'},
+  {k:['news','rss','feed','ニュース','blog','article','記事'],ic:['newspaper','book-open'],d:'ニュース・記事を読むためのサイト',c:'learn'},
+  {k:['weather','天気','tenki','forecast'],ic:['cloud-sun'],d:'天気予報',c:'daily'},
+  {k:['map','maps','地図','route','transit','乗換','train','travel','旅行'],ic:['map','map-pin','bus'],d:'地図・ルートを調べるツール',c:'daily'},
+  {k:['music','音楽','audio','sound','podcast'],ic:['music','headphones'],d:'音楽・音声関連のツール',c:'daily'},
+  {k:['video','動画','movie','stream'],ic:['video'],d:'動画関連のツール',c:'learn'},
+  {k:['game','games','ゲーム'],ic:['gamepad-2'],d:'ゲーム',c:'daily'},
+  {k:['dashboard','analytics','chart','graph','stats','グラフ','分析','report','レポート'],ic:['bar-chart-3','layout-dashboard','pie-chart'],d:'データを集計・可視化するツール',c:'work'},
+  {k:['mail','email','メール','inbox'],ic:['mail'],d:'メール関連のツール',c:'work'},
+  {k:['shop','store','cart','買い物','ec'],ic:['shopping-cart'],d:'ショッピング',c:'daily'},
+  {k:['design','デザイン','ui','color','colors','カラー','palette','font'],ic:['palette','pen-tool'],d:'デザイン用のツール',c:'work'},
+  {k:['link','links','portal','hub','bookmark','ポータル','リンク'],ic:['link','layout-dashboard'],d:'リンクをまとめるポータル',c:'self'},
+  {k:['search','検索'],ic:['search'],d:'検索ツール',c:'learn'},
+  {k:['habit','習慣','health','健康','fitness','workout','筋トレ'],ic:['heart','zap'],d:'習慣・健康を記録するツール',c:'daily'},
+];
+const ALL_ICONS=['sparkles','bot','code','terminal','database','cpu','rocket','wrench','settings','calendar','calendar-days','clock','timer','file-text','clipboard-list','check-square','list-todo','notebook','sticky-note','pen-tool','palette','image','camera','video','music','headphones','mail','message-circle','users','briefcase','wallet','calculator','bar-chart-3','pie-chart','layout-dashboard','cloud','cloud-sun','globe','map','map-pin','bus','shopping-cart','home','heart','star','zap','book-open','graduation-cap','newspaper','languages','lightbulb','search','link','folder','gamepad-2','shield','type'];
+const PLATFORMS=['vercel.app','netlify.app','github.io','pages.dev','web.app','firebaseapp.com','glitch.me','onrender.com','replit.app','herokuapp.com','claude.site','codesandbox.io','stackblitz.io'];
+
+function normalizeUrl(raw){
+  let s=(raw||'').trim(); if(!s) return null;
+  if(/^(localhost|127\.|0\.0\.0\.0|\d+\.\d+\.\d+\.\d+)/i.test(s)) s='http://'+s; else if(!/^[a-z][a-z0-9+.-]*:\/\//i.test(s)&&!/^file:/i.test(s)) s='https://'+s;
+  try{const u=new URL(s); if(u.protocol==='file:') return u;
+    if(!u.hostname||(!u.hostname.includes('.')&&u.hostname!=='localhost')) return null; return u;}catch(e){return null}
+}
+const hostOf=url=>{const u=normalizeUrl(url);return u?u.hostname.replace(/^www\./,''):''};
+function isLocal(h){return h==='localhost'||/^(127\.|10\.|192\.168\.|0\.0\.0\.0)/.test(h)||/\.local$/.test(h)||/^172\.(1[6-9]|2\d|3[01])\./.test(h)}
+function isSelf(u){const h=u.hostname.replace(/^www\./,'');
+  if(u.protocol==='file:'||isLocal(h)) return true;
+  if(PLATFORMS.some(p=>h===p||h.endsWith('.'+p))) return true;
+  if(h==='claude.ai'&&/^\/(artifact|public\/artifacts)/.test(u.pathname)) return true;
+  return false;}
+function findKnown(h){ if(KNOWN[h]) return KNOWN[h]; const k=Object.keys(KNOWN).filter(k=>h.endsWith('.'+k)).sort((a,b)=>b.length-a.length)[0]; return k?KNOWN[k]:null;}
+function prettify(s){
+  try{s=decodeURIComponent(s)}catch(e){}
+  s=s.replace(/\.(html?|php|aspx?|jsx?)$/i,'').replace(/([a-z])([A-Z])/g,'$1 $2');
+  const w=s.split(/[-_.\s+]+/).filter(Boolean);
+  return w.map(x=>/^[a-z]/.test(x)?x[0].toUpperCase()+x.slice(1):x).join(' ')||s;
+}
+function nameFromUrl(u){
+  const h=u.hostname.replace(/^www\./,'');
+  const segs=u.pathname.split('/').filter(x=>x&&!/^(index(\.html?)?|app|public|dist|src|build)$/i.test(x));
+  if((h==='claude.ai'||h.endsWith('claude.site'))) return 'Claudeで作ったアプリ';
+  const plat=PLATFORMS.find(p=>h===p||h.endsWith('.'+p));
+  if(plat){const sub=h.slice(0,-(plat.length+1)); if(plat==='github.io'&&segs[0]) return prettify(segs[0]); return prettify(segs.length&&plat!=='github.io'&&segs[segs.length-1].length>2?segs[segs.length-1]:sub||plat);}
+  if(u.protocol==='file:') return prettify((segs[segs.length-1]||'ローカルファイル'));
+  if(isLocal(h)) return segs.length?prettify(segs[segs.length-1]):`ローカルアプリ${u.port?' :'+u.port:''}`;
+  const p=h.split('.'); const label=(p.length>2&&['co','or','ne','ac','go','com','gr'].includes(p[p.length-2]))?p[p.length-3]:p[p.length-2]||p[0];
+  return prettify(label);
+}
+function matchRules(text){
+  const low=text.toLowerCase(); const tokens=new Set(low.split(/[^a-z0-9]+/).filter(Boolean));
+  return RULES.filter(r=>r.k.some(k=>/^[\x00-\x7f]+$/.test(k)?(tokens.has(k)||(k.length>=4&&[...tokens].some(t=>t.startsWith(k)))):low.includes(k)));
+}
+function suggestIcons(text,self,base){
+  const out=[]; const add=i=>{if(i&&!out.includes(i)) out.push(i)};
+  add(base); matchRules(text).forEach(r=>r.ic.forEach(add));
+  (self?['sparkles','code','rocket','wrench','lightbulb','zap']:['globe','link','star','bookmark','folder']).forEach(add);
+  return out.filter(i=>i!=='bookmark').slice(0,8);
+}
+function analyze(raw){
+  const u=normalizeUrl(raw); if(!u) return null;
+  const host=u.hostname.replace(/^www\./,''); const self=isSelf(u);
+  const known=self?null:findKnown(host);
+  const name=known?known[0]:nameFromUrl(u);
+  let path=u.pathname; try{path=decodeURIComponent(path)}catch(e){}
+  const isClaude=host==='claude.ai'||host.endsWith('claude.site');
+  const text=(isClaude?'':host.split('.').slice(0,-1).join(' '))+' '+(isClaude?'':path)+' '+u.search+' '+name;
+  const rules=matchRules(text);
+  const desc=known?known[1]:(rules[0]?rules[0].d+(self?'（自作）':''):(self?'自作のWebツール':`${host} のWebサービス`));
+  const catKey=self?'self':(known?known[2]:(rules.find(r=>r.c)||{}).c||'daily');
+  const icons=suggestIcons(text,self,known?known[3]:null);
+  return {url:u.href.replace(/\/$/,u.pathname==='/'&&!u.search&&!u.hash?'':'/'),name,desc,catKey,self,host,icons,mode:self||isLocal(host)?'lucide':'favicon',icon:icons[0]};
+}
+
+/* ---------- state ---------- */
+function sample(){
+  const cats=Object.entries(CAT_NAMES).map(([k,n])=>({id:'c-'+k,key:k,name:n}));
+  const T=(name,url,desc,cat,mode,icon)=>({id:uid(),name,url,desc,catId:'c-'+cat,mode,icon});
+  return {theme:'auto',cats,tools:[
+    T('シフト希望プランナー','https://claude.ai/artifact/9KRVbrVE1KRD9oVRmjYd2i','目標月収から逆算して来月のシフト希望を組む計算ツール','self','lucide','calendar-days'),
+    T('テキスト抽出ツール','http://localhost:5173/text-extractor','画像やPDFから文字を取り出す自作ツール（サンプル）','self','lucide','file-text'),
+    T('Claude','https://claude.ai','AIアシスタント（文章作成・分析・コーディング）','work','favicon','sparkles'),
+    T('GitHub','https://github.com','コードのホスティングと共同開発','work','favicon','code'),
+    T('Google カレンダー','https://calendar.google.com','予定・スケジュール管理','daily','favicon','calendar'),
+    T('DeepL 翻訳','https://www.deepl.com/translator','高精度なAI翻訳','daily','favicon','languages'),
+    T('Google','https://www.google.com','Web検索エンジン','learn','favicon','search'),
+    T('Zenn','https://zenn.dev','エンジニア向けの技術記事・本','learn','favicon','book-open'),
+  ]};
+}
+function sanitize(s){
+  if(!s||!Array.isArray(s.cats)||!Array.isArray(s.tools)) return null;
+  if(!s.cats.length) s.cats=[{id:'c-'+uid(),name:'未分類'}];
+  const ids=new Set(s.cats.map(c=>c.id));
+  s.tools=s.tools.filter(t=>t&&t.url).map(t=>({id:t.id||uid(),name:t.name||'無題',url:t.url,desc:t.desc||'',catId:ids.has(t.catId)?t.catId:s.cats[0].id,mode:t.mode==='lucide'?'lucide':'favicon',icon:t.icon||'globe'}));
+  s.theme=['auto','light','dark'].includes(s.theme)?s.theme:'auto';
+  return s;
+}
+function load(){try{return sanitize(JSON.parse(localStorage.getItem(KEY)))}catch(e){return null}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}}
+let state=load()||sample();
+let tab='all', query='';
+const failed=new Set();
+
+/* ---------- icons ---------- */
+function drawIcons(){ if(window.lucide&&lucide.createIcons){try{lucide.createIcons({icons:lucide.icons,attrs:{'stroke-width':1.8}})}catch(e){}} }
+const hue=s=>{let h=0;for(const ch of String(s))h=(h*31+ch.codePointAt(0))%360;return h};
+const initial=s=>esc((String(s).trim()[0]||'?').toUpperCase());
+const favUrl=h=>`https://www.google.com/s2/favicons?domain=${encodeURIComponent(h)}&sz=64`;
+function tileHTML(t,lg){
+  const h=hostOf(t.url); const fav=t.mode==='favicon'&&h&&!isLocal(h)&&!failed.has(h);
+  return `<span class="tile${lg?' lg':''}${fav?' fav':''}" style="--h:${hue(t.name+t.icon)}">`+
+    (fav?`<img class="favimg" alt="" data-host="${esc(h)}" src="${favUrl(h)}">`:'')+
+    `<span class="fb"${fav?' hidden':''}><i data-lucide="${esc(t.icon)}">${initial(t.name)}</i></span></span>`;
+}
+function bindFavs(root){
+  root.querySelectorAll('img.favimg').forEach(img=>{
+    const fail=()=>{failed.add(img.dataset.host); const tile=img.parentElement; if(!tile) return; tile.classList.remove('fav'); const f=tile.querySelector('[hidden]'); if(f) f.removeAttribute('hidden'); img.remove();};
+    if(img.complete&&img.naturalWidth===0&&img.src) {fail();return}
+    img.addEventListener('error',fail,{once:true});
+    img.addEventListener('load',()=>{if(img.naturalWidth<=16) fail()},{once:true});
+  });
+}
+
+/* ---------- render ---------- */
+const matches=t=>!query||(t.name+' '+t.desc+' '+t.url).toLowerCase().includes(query);
+function renderTabs(){
+  const el=$('#tabs');
+  const n=id=>state.tools.filter(t=>(id==='all'||t.catId===id)&&matches(t)).length;
+  el.innerHTML=`<button class="tab" role="tab" data-tab="all" aria-selected="${tab==='all'}">すべて<span class="c">${n('all')}</span></button>`+
+    state.cats.map(c=>`<button class="tab" role="tab" data-tab="${c.id}" aria-selected="${tab===c.id}">${esc(c.name)}<span class="c">${n(c.id)}</span></button>`).join('')+
+    `<button class="tab edit" id="catEdit"><i data-lucide="folder-cog">⚙</i>カテゴリを編集</button>`;
+}
+function cardHTML(t){
+  const h=hostOf(t.url)||t.url;
+  return `<div class="card${selected.has(t.id)?' selected':''}" data-id="${t.id}">
+    <input type="checkbox" class="sel" aria-label="${esc(t.name)} を選択"${selected.has(t.id)?' checked':''}>
+    <a class="cover" href="${esc(t.url)}" target="_blank" rel="noopener noreferrer" aria-label="${esc(t.name)} を開く"></a>
+    ${tileHTML(t)}
+    <div class="body"><h3>${esc(t.name)}</h3><p>${esc(t.desc)||'&nbsp;'}</p><div class="host"><i data-lucide="${isLocal(h)?'monitor':'globe'}"></i>${esc(h)}</div></div>
+    <div class="acts">
+      <button class="handle" data-act="drag" aria-label="ドラッグして並び替え" title="ドラッグして並び替え"><i data-lucide="grip-vertical">⋮</i></button>
+      <button data-act="up" aria-label="前へ移動" title="前へ"><i data-lucide="chevron-up">↑</i></button>
+      <button data-act="down" aria-label="後ろへ移動" title="後ろへ"><i data-lucide="chevron-down">↓</i></button>
+      <button data-act="edit" aria-label="編集" title="編集"><i data-lucide="pencil">✎</i></button>
+      <button data-act="del" aria-label="削除" title="削除"><i data-lucide="trash-2">✕</i></button>
+    </div></div>`;
+}
+function renderMain(){
+  const cats=tab==='all'?state.cats:state.cats.filter(c=>c.id===tab);
+  let html='', shown=0;
+  cats.forEach(c=>{
+    const list=state.tools.filter(t=>t.catId===c.id&&matches(t));
+    if(query&&!list.length) return;
+    shown+=list.length;
+    html+=`<section class="sec"><div class="sec-h"><h2>${esc(c.name)}</h2><span class="cnt">${list.length}</span><span class="line"></span><button class="btn" data-act="add" data-cat="${c.id}"><i data-lucide="plus">＋</i>追加</button></div>
+      <div class="grid" data-cat="${c.id}">${list.length?list.map(cardHTML).join(''):`<div class="empty">まだツールがありません。カードをここへドラッグするか「追加」から登録できます。</div>`}</div></section>`;
+  });
+  if(query&&!shown) html=`<div class="noresult">「${esc(query)}」に一致するツールはありません。<br>上の欄にURLを貼ると新しく登録できます。</div>`;
+  $('#main').innerHTML=html;
+}
+function applyTheme(){
+  const r=document.documentElement; if(state.theme==='auto') r.removeAttribute('data-theme'); else r.setAttribute('data-theme',state.theme);
+  const m={auto:['sun-moon','自動'],light:['sun','ライト'],dark:['moon','ダーク']}[state.theme];
+  $('#themeBtn').innerHTML=`<i data-lucide="${m[0]}">◐</i>`; $('#themeBtn').title='表示テーマ: '+m[1];
+}
+function render(){ if(tab!=='all'&&!state.cats.some(c=>c.id===tab)) tab='all'; [...selected].forEach(id=>{if(!state.tools.some(t=>t.id===id)) selected.delete(id)}); renderTabs(); renderMain(); drawIcons(); bindFavs($('#main')); updateSelbar(); }
+
+/* ---------- interactions ---------- */
+$('#tabs').addEventListener('click',e=>{
+  if(e.target.closest('#catEdit')) return openCats();
+  const b=e.target.closest('[data-tab]'); if(b){tab=b.dataset.tab; render();}
+});
+let editing=false; const selected=new Set();
+function deleteTools(ids){
+  const snap=state.tools.slice(); const n=ids.length; if(!n) return;
+  const one=snap.find(t=>t.id===ids[0]);
+  state.tools=state.tools.filter(t=>!ids.includes(t.id)); ids.forEach(i=>selected.delete(i));
+  save(); render();
+  toast(n===1?`「${one?one.name:''}」を削除しました`:`${n}件のリンクを削除しました`,()=>{state.tools=snap;save();render();});
+}
+function setEditing(on){editing=on; selected.clear(); document.body.classList.toggle('editing',on); $('#editBtn').setAttribute('aria-pressed',on); render();}
+function updateSelbar(){
+  if(!editing) return; const n=selected.size;
+  $('#selInfo').textContent=n?`${n}件を選択中`:'カードをタップで編集、チェックでまとめて削除・移動';
+  $('#selDel').disabled=!n;
+  const m=$('#selMove'); m.disabled=!n; m.innerHTML='<option value="">カテゴリへ移動…</option>'+state.cats.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('');
+}
+$('#main').addEventListener('change',e=>{
+  const cb=e.target.closest('.sel'); if(!cb) return; const card=cb.closest('.card'); const id=card.dataset.id;
+  if(cb.checked) selected.add(id); else selected.delete(id); card.classList.toggle('selected',cb.checked); updateSelbar();
+});
+$('#main').addEventListener('click',e=>{
+  if(e.target.closest('.sel')) return;
+  const b=e.target.closest('[data-act]');
+  if(!b){ if(editing){const c=e.target.closest('.card[data-id]'); const t=c&&state.tools.find(x=>x.id===c.dataset.id); if(t) openEditor(t);} return; }
+  const act=b.dataset.act;
+  if(act==='add') return openEditor(null,{catId:b.dataset.cat});
+  const card=b.closest('.card'); if(!card) return; const t=state.tools.find(x=>x.id===card.dataset.id); if(!t) return;
+  if(act==='edit') openEditor(t);
+  if(act==='del') deleteTools([t.id]);
+  if(act==='up'||act==='down') moveStep(t,act==='up'?-1:1);
+});
+function moveStep(t,dir){
+  const same=state.tools.filter(x=>x.catId===t.catId); const i=same.indexOf(t); const o=same[i+dir]; if(!o) return;
+  const a=state.tools.indexOf(t), b=state.tools.indexOf(o); [state.tools[a],state.tools[b]]=[state.tools[b],state.tools[a]];
+  save(); render(); const btn=document.querySelector(`.card[data-id="${t.id}"] [data-act="${dir<0?'up':'down'}"]`); if(btn) btn.focus();
+}
+
+/* drag & drop (pointer events: mouse + touch) */
+let drag=null;
+$('#main').addEventListener('pointerdown',e=>{
+  const h=e.target.closest('.handle'); if(!h||e.button>0) return;
+  e.preventDefault();
+  const card=h.closest('.card'); const r=card.getBoundingClientRect();
+  const ghost=card.cloneNode(true); ghost.classList.add('ghost'); ghost.style.width=r.width+'px'; ghost.style.left=r.left+'px'; ghost.style.top=r.top+'px';
+  document.body.appendChild(ghost); card.classList.add('dragging');
+  drag={id:card.dataset.id,card,ghost,dx:e.clientX-r.left,dy:e.clientY-r.top,target:null,pos:null};
+  h.setPointerCapture(e.pointerId);
+  h.addEventListener('pointermove',onMove); h.addEventListener('pointerup',onUp,{once:true}); h.addEventListener('pointercancel',onUp,{once:true});
+});
+function clearMarks(){document.querySelectorAll('.drop-before,.drop-after,.drop-end').forEach(x=>x.classList.remove('drop-before','drop-after','drop-end'))}
+function onMove(e){
+  if(!drag) return;
+  drag.ghost.style.left=(e.clientX-drag.dx)+'px'; drag.ghost.style.top=(e.clientY-drag.dy)+'px';
+  if(e.clientY<70) window.scrollBy(0,-14); else if(e.clientY>innerHeight-70) window.scrollBy(0,14);
+  clearMarks(); drag.target=null;
+  const el=document.elementFromPoint(e.clientX,e.clientY); if(!el) return;
+  const card=el.closest('.card[data-id]'); 
+  if(card&&card!==drag.card&&!card.classList.contains('ghost')){
+    const r=card.getBoundingClientRect(); const single=card.parentElement.getBoundingClientRect().width<r.width*1.6;
+    const after=single?(e.clientY>r.top+r.height/2):(e.clientX>r.left+r.width/2);
+    card.classList.add(after?'drop-after':'drop-before'); drag.target={type:'card',id:card.dataset.id,after};
+    return;
+  }
+  const grid=el.closest('.grid[data-cat]')||(el.closest('.sec')&&el.closest('.sec').querySelector('.grid[data-cat]'));
+  if(grid){grid.classList.add('drop-end'); drag.target={type:'cat',cat:grid.dataset.cat};}
+}
+function onUp(e){
+  const h=e.currentTarget; h.removeEventListener('pointermove',onMove);
+  if(!drag) return; const d=drag; drag=null;
+  d.ghost.remove(); d.card.classList.remove('dragging'); clearMarks();
+  if(!d.target) return;
+  const t=state.tools.find(x=>x.id===d.id); if(!t) return;
+  state.tools.splice(state.tools.indexOf(t),1);
+  if(d.target.type==='card'){
+    const o=state.tools.find(x=>x.id===d.target.id); t.catId=o.catId;
+    state.tools.splice(state.tools.indexOf(o)+(d.target.after?1:0),0,t);
+  } else {
+    t.catId=d.target.cat; let last=-1; state.tools.forEach((x,i)=>{if(x.catId===t.catId) last=i});
+    state.tools.splice(last<0?state.tools.length:last+1,0,t);
+  }
+  save(); render(); toast('並び順を保存しました');
+}
+
+/* search */
+const q=$('#q');
+q.addEventListener('input',()=>{query=q.value.trim().toLowerCase(); render();});
+q.addEventListener('keydown',e=>{
+  if(e.key==='Enter'){const a=document.querySelector('#main .card .cover'); if(a&&query){window.open(a.href,'_blank','noopener');}}
+  if(e.key==='Escape'){q.value='';query='';render();}
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='/'&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)&&!$('#overlay').classList.contains('open')){e.preventDefault();q.focus();}
+  if(e.key==='Escape'){ if($('#overlay').classList.contains('open')) closeModal(); else if(editing&&document.activeElement!==q) setEditing(false); }
+});
+
+/* quick add */
+function quickAdd(){
+  const v=$('#addUrl').value; if(!v.trim()){$('#addUrl').focus();return}
+  const a=analyze(v); if(!a){toast('URLとして読み取れませんでした。https:// から始まる形で貼り付けてください');return}
+  openEditor(null,{analysis:a}); $('#addUrl').value='';
+}
+$('#addBtn').onclick=quickAdd;
+$('#addUrl').addEventListener('keydown',e=>{if(e.key==='Enter') quickAdd()});
+
+/* ---------- modal ---------- */
+let lastFocus=null;
+function openModal(html,label){lastFocus=document.activeElement; $('#panel').innerHTML=html; $('#overlay').setAttribute('aria-label',label); $('#overlay').classList.add('open'); drawIcons();}
+function closeModal(){$('#overlay').classList.remove('open'); if(lastFocus&&lastFocus.focus) lastFocus.focus();}
+$('#overlay').addEventListener('pointerdown',e=>{if(e.target.id==='overlay') closeModal()});
+
+/* tool editor */
+let draft=null, suggestions=[];
+function catKeyToId(key){const c=state.cats.find(c=>c.key===key)||state.cats.find(c=>c.name===CAT_NAMES[key]);return c?c.id:state.cats[0].id}
+function openEditor(tool,opt={}){
+  const editing=!!tool;
+  draft=tool?{...tool}:{id:uid(),name:'',url:'',desc:'',catId:opt.catId||(tab!=='all'?tab:state.cats[0].id),mode:'favicon',icon:'globe'};
+  suggestions=suggestIcons((draft.url||'')+' '+draft.name+' '+draft.desc,isSelfUrl(draft.url),draft.icon);
+  if(opt.analysis) applyAnalysis(opt.analysis);
+  openModal(`<h2>${editing?'ツールを編集':'ツールを追加'}</h2>
+   <div class="f"><label for="eUrl">URL</label>
+     <div class="urlrow"><input class="in" id="eUrl" type="url" inputmode="url" placeholder="https://..."><button class="btn" id="eFetch" type="button"><i data-lucide="wand-2">✦</i>自動取得</button><a class="btn" id="eOpen" target="_blank" rel="noopener noreferrer" title="新しいタブで開いて確認" aria-label="リンクを開いて確認"><i data-lucide="external-link">↗</i></a></div>
+     <div class="note" id="eNote">URLのドメインやパスから名前・説明・カテゴリ・アイコンを推測します（外部サイトへは接続しません）。</div></div>
+   <div class="f"><label for="eName">ツール／サービス名</label><input class="in" id="eName" maxlength="40"></div>
+   <div class="f"><label for="eDesc">概要・機能説明</label><textarea class="in" id="eDesc" maxlength="120"></textarea></div>
+   <div class="f"><label for="eCat">カテゴリ</label><select class="in" id="eCat"></select>
+     <div id="eNewCatWrap" hidden style="margin-top:6px" class="urlrow"><input class="in" id="eNewCat" placeholder="新しいカテゴリ名"><button class="btn" id="eNewCatOk" type="button">作成</button></div></div>
+   <div class="f"><label>アイコン</label><div class="iconpick"><div id="ePreview"></div><div style="flex:1"><div class="icgrid" id="eIcons"></div>
+     <button class="linkbtn" id="eMore" type="button">ほかのアイコンから選ぶ</button><div class="icgrid" id="eAll" hidden style="margin-top:8px"></div></div></div></div>
+   <div class="foot">${editing?'<button class="btn danger" id="eDel" type="button"><i data-lucide="trash-2">🗑</i>削除</button>':''}<span class="sp"></span>
+     <button class="btn" id="eCancel" type="button">キャンセル</button><button class="btn primary" id="eSave" type="button">${editing?'保存':'追加'}</button></div>`, editing?'ツールを編集':'ツールを追加');
+  $('#eUrl').value=draft.url; $('#eName').value=draft.name; $('#eDesc').value=draft.desc;
+  const syncOpen=()=>{const u=normalizeUrl($('#eUrl').value); const o=$('#eOpen'); if(u){o.href=u.href;o.style.opacity='';o.style.pointerEvents='';}else{o.removeAttribute('href');o.style.opacity='.4';o.style.pointerEvents='none';}};
+  syncOpen(); $('#eUrl').addEventListener('input',syncOpen); $('#eUrl').addEventListener('change',syncOpen);
+  fillCatSelect();
+  renderEditorIcons();
+  if(opt.analysis) showAnalysisNote(opt.analysis);
+  $('#eFetch').onclick=()=>{const a=analyze($('#eUrl').value); if(!a){toast('URLとして読み取れませんでした');return} applyAnalysis(a); $('#eUrl').value=a.url;$('#eName').value=draft.name;$('#eDesc').value=draft.desc;fillCatSelect();renderEditorIcons();showAnalysisNote(a);};
+  $('#eUrl').addEventListener('keydown',e=>{if(e.key==='Enter') $('#eFetch').click()});
+  const refresh=()=>{draft.name=$('#eName').value;draft.desc=$('#eDesc').value;suggestions=suggestIcons($('#eUrl').value+' '+draft.name+' '+draft.desc,isSelfUrl($('#eUrl').value),draft.icon);renderEditorIcons();};
+  $('#eName').addEventListener('input',refresh); $('#eDesc').addEventListener('input',refresh);
+  $('#eUrl').addEventListener('change',()=>{draft.url=$('#eUrl').value;renderEditorIcons();});
+  $('#eCat').onchange=e=>{if(e.target.value==='__new'){$('#eNewCatWrap').hidden=false;$('#eNewCat').focus();}else{draft.catId=e.target.value;$('#eNewCatWrap').hidden=true;}};
+  $('#eNewCatOk').onclick=()=>{const n=$('#eNewCat').value.trim(); if(!n) return; const c={id:'c-'+uid(),name:n}; state.cats.push(c); draft.catId=c.id; save(); fillCatSelect(); $('#eNewCatWrap').hidden=true; renderTabs(); drawIcons();};
+  $('#eMore').onclick=()=>{const a=$('#eAll'); a.hidden=!a.hidden; $('#eMore').textContent=a.hidden?'ほかのアイコンから選ぶ':'閉じる'; if(!a.hidden){renderAllIcons();}};
+  $('#eCancel').onclick=closeModal;
+  if(editing) $('#eDel').onclick=()=>{closeModal(); deleteTools([tool.id]);};
+  $('#eSave').onclick=()=>{
+    const u=normalizeUrl($('#eUrl').value); if(!u){toast('有効なURLを入力してください');$('#eUrl').focus();return}
+    draft.url=u.href; draft.name=$('#eName').value.trim()||nameFromUrl(u); draft.desc=$('#eDesc').value.trim();
+    if(draft.catId==='__new'||!state.cats.some(c=>c.id===draft.catId)) draft.catId=state.cats[0].id;
+    const i=state.tools.findIndex(x=>x.id===draft.id);
+    if(i>=0){const moved=state.tools[i].catId!==draft.catId; state.tools[i]=draft; if(moved){state.tools.splice(i,1);let last=-1;state.tools.forEach((x,j)=>{if(x.catId===draft.catId) last=j});state.tools.splice(last+1,0,draft);}}
+    else {let last=-1;state.tools.forEach((x,j)=>{if(x.catId===draft.catId) last=j}); state.tools.splice(last<0?state.tools.length:last+1,0,draft);}
+    save(); closeModal(); render(); toast(i>=0?'保存しました':'追加しました');
+    if(i<0){const c=document.querySelector(`.card[data-id="${draft.id}"]`); if(c) c.scrollIntoView({block:'center',behavior:'smooth'});}
+  };
+  setTimeout(()=>{(draft.url?$('#eName'):$('#eUrl')).focus()},30);
+}
+function isSelfUrl(url){const u=normalizeUrl(url);return u?isSelf(u):false}
+function applyAnalysis(a){draft.url=a.url;draft.name=a.name;draft.desc=a.desc;draft.catId=catKeyToId(a.catKey);draft.mode=a.mode;draft.icon=a.icon;suggestions=a.icons;}
+function showAnalysisNote(a){
+  const cat=state.cats.find(c=>c.id===draft.catId);
+  $('#eNote').innerHTML=(a.self?'自作アプリ・ローカルツールと判定しました。名前や説明から連想したアイコンを提案しています。':'既知のサービス／外部サイトとして推測しました。公式ファビコンを使い、取得できないときは下のアイコンを表示します。')+
+    `<span class="badge">${esc(cat?cat.name:'')}</span>`;
+}
+function fillCatSelect(){
+  $('#eCat').innerHTML=state.cats.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('')+`<option value="__new">＋ 新しいカテゴリを作る…</option>`;
+  $('#eCat').value=draft.catId;
+}
+function renderEditorIcons(){
+  const url=$('#eUrl')?$('#eUrl').value:draft.url; const h=hostOf(url);
+  const canFav=h&&!isLocal(h);
+  if(!canFav&&draft.mode==='favicon') draft.mode='lucide';
+  $('#ePreview').innerHTML=tileHTML({...draft,url,name:$('#eName')?$('#eName').value||'?':draft.name},true);
+  const box=$('#eIcons');
+  box.innerHTML=(canFav?`<button type="button" class="ico favopt" data-mode="favicon" aria-pressed="${draft.mode==='favicon'}" title="公式ファビコンを使う"><i data-lucide="globe"></i>ファビコン</button>`:'')+
+    suggestions.map(i=>`<button type="button" class="ico" data-icon="${i}" aria-pressed="${draft.mode==='lucide'&&draft.icon===i}" title="${i}"><i data-lucide="${i}">${i[0].toUpperCase()}</i></button>`).join('');
+  box.onclick=pickIcon;
+  if(!$('#eAll').hidden) renderAllIcons();
+  drawIcons(); bindFavs($('#ePreview'));
+}
+function renderAllIcons(){
+  const a=$('#eAll'); a.innerHTML=ALL_ICONS.map(i=>`<button type="button" class="ico" data-icon="${i}" aria-pressed="${draft.mode==='lucide'&&draft.icon===i}" title="${i}"><i data-lucide="${i}">${i[0].toUpperCase()}</i></button>`).join('');
+  a.onclick=pickIcon; drawIcons();
+}
+function pickIcon(e){
+  const b=e.target.closest('button'); if(!b) return;
+  if(b.dataset.mode==='favicon'){draft.mode='favicon';}
+  else {draft.mode='lucide'; draft.icon=b.dataset.icon; if(!suggestions.includes(draft.icon)) suggestions=[draft.icon,...suggestions].slice(0,8);}
+  renderEditorIcons();
+}
+
+/* category manager */
+function openCats(){
+  openModal(`<h2>カテゴリを編集</h2><div id="cList"></div>
+    <div class="urlrow" style="margin-top:10px"><input class="in" id="cNew" placeholder="新しいカテゴリ名"><button class="btn primary" id="cAdd" type="button"><i data-lucide="plus">＋</i>追加</button></div>
+    <div class="note">カテゴリを削除すると、中のツールは一番上のカテゴリへ移ります。</div>
+    <div class="foot"><button class="btn primary" id="cDone" type="button">完了</button></div>`,'カテゴリを編集');
+  renderCatList();
+  $('#cAdd').onclick=()=>{const n=$('#cNew').value.trim(); if(!n) return; state.cats.push({id:'c-'+uid(),name:n}); $('#cNew').value=''; save(); renderCatList(); render();};
+  $('#cNew').addEventListener('keydown',e=>{if(e.key==='Enter') $('#cAdd').click()});
+  $('#cDone').onclick=closeModal;
+}
+function renderCatList(){
+  const box=$('#cList');
+  box.innerHTML=state.cats.map((c,i)=>`<div class="catrow" data-id="${c.id}"><input class="in" value="${esc(c.name)}" aria-label="カテゴリ名">
+    <button type="button" class="ico" data-c="up" aria-label="上へ" ${i===0?'disabled':''}><i data-lucide="arrow-up">↑</i></button>
+    <button type="button" class="ico" data-c="down" aria-label="下へ" ${i===state.cats.length-1?'disabled':''}><i data-lucide="arrow-down">↓</i></button>
+    <button type="button" class="ico" data-c="del" aria-label="削除" ${state.cats.length<=1?'disabled':''}><i data-lucide="trash-2">✕</i></button></div>`).join('');
+  box.querySelectorAll('.catrow input').forEach(inp=>inp.addEventListener('input',()=>{const c=state.cats.find(x=>x.id===inp.closest('.catrow').dataset.id); c.name=inp.value||'無題'; save(); render();}));
+  box.onclick=e=>{
+    const b=e.target.closest('[data-c]'); if(!b) return; const id=b.closest('.catrow').dataset.id; const i=state.cats.findIndex(x=>x.id===id);
+    if(b.dataset.c==='up'&&i>0) [state.cats[i-1],state.cats[i]]=[state.cats[i],state.cats[i-1]];
+    if(b.dataset.c==='down'&&i<state.cats.length-1) [state.cats[i+1],state.cats[i]]=[state.cats[i],state.cats[i+1]];
+    if(b.dataset.c==='del'){const c=state.cats[i]; const n=state.tools.filter(t=>t.catId===id).length;
+      if(!confirm(`「${c.name}」を削除しますか？${n?`\n中の ${n} 件は別のカテゴリへ移ります。`:''}`)) return;
+      state.cats.splice(i,1); state.tools.forEach(t=>{if(t.catId===id) t.catId=state.cats[0].id}); if(tab===id) tab='all';}
+    save(); renderCatList(); render();
+  };
+  drawIcons();
+}
+
+/* backup */
+$('#backupBtn').onclick=()=>{
+  openModal(`<h2>バックアップ・復元</h2>
+   <div class="f"><label for="bOut">現在のデータ（JSON）</label><textarea class="in" id="bOut" readonly style="min-height:110px;font-size:12px"></textarea>
+   <div class="row" style="margin-top:6px"><button class="btn" id="bCopy" type="button"><i data-lucide="copy">⧉</i>コピー</button></div></div>
+   <div class="f"><label for="bIn">復元するJSONを貼り付け</label><textarea class="in" id="bIn" style="min-height:90px;font-size:12px" placeholder='{"cats":[...],"tools":[...]}'></textarea></div>
+   <div class="foot"><button class="btn danger" id="bReset" type="button">サンプルに戻す</button><span class="sp"></span><button class="btn" id="bClose" type="button">閉じる</button><button class="btn primary" id="bLoad" type="button">復元する</button></div>
+   <div class="note">データはこのブラウザ内（localStorage）に保存されています。別の端末へ移すときはJSONをコピーして貼り付けてください。</div>`,'バックアップ・復元');
+  $('#bOut').value=JSON.stringify(state,null,1);
+  $('#bCopy').onclick=async()=>{try{await navigator.clipboard.writeText($('#bOut').value);toast('コピーしました')}catch(e){$('#bOut').select();toast('選択しました。コピーしてください')}};
+  $('#bLoad').onclick=()=>{try{const s=sanitize(JSON.parse($('#bIn').value)); if(!s) throw 0; if(!confirm('今のデータを置き換えて復元しますか？')) return; state=s; save(); applyTheme(); closeModal(); tab='all'; render(); toast('復元しました');}catch(e){toast('JSONを読み取れませんでした')}};
+  $('#bReset').onclick=()=>{if(!confirm('登録したツールをすべて消して、サンプルの状態に戻しますか？')) return; const th=state.theme; state=sample(); state.theme=th; save(); closeModal(); tab='all'; render(); toast('サンプルに戻しました');};
+  $('#bClose').onclick=closeModal;
+};
+
+$('#themeBtn').onclick=()=>{state.theme={auto:'light',light:'dark',dark:'auto'}[state.theme]; save(); applyTheme(); drawIcons(); toast('テーマ: '+{auto:'端末に合わせる',light:'ライト',dark:'ダーク'}[state.theme]);};
+
+let tt; function toast(m,undo){
+  const t=$('#toast'); t.textContent=m;
+  if(undo){const b=document.createElement('button'); b.type='button'; b.textContent='元に戻す'; b.onclick=()=>{undo(); toast('元に戻しました');}; t.appendChild(b);}
+  t.classList.add('show'); clearTimeout(tt); tt=setTimeout(()=>t.classList.remove('show'),undo?7000:2200);
+}
+
+$('#editBtn').onclick=()=>setEditing(!editing);
+$('#editDone').onclick=()=>setEditing(false);
+$('#selDel').onclick=()=>{if(selected.size) deleteTools([...selected]);};
+$('#selAll').onclick=()=>{const cards=[...document.querySelectorAll('#main .card[data-id]')]; const all=cards.length&&cards.every(c=>selected.has(c.dataset.id)); cards.forEach(c=>all?selected.delete(c.dataset.id):selected.add(c.dataset.id)); render();};
+$('#selMove').onchange=e=>{
+  const cid=e.target.value; if(!cid||!selected.size) return;
+  const moving=state.tools.filter(t=>selected.has(t.id)); state.tools=state.tools.filter(t=>!selected.has(t.id));
+  moving.forEach(t=>t.catId=cid); let last=-1; state.tools.forEach((x,i)=>{if(x.catId===cid) last=i});
+  state.tools.splice(last<0?state.tools.length:last+1,0,...moving);
+  selected.clear(); save(); render();
+  toast(`${moving.length}件を「${(state.cats.find(c=>c.id===cid)||{}).name}」へ移動しました`);
+};
+applyTheme(); render(); drawIcons();
+window.addEventListener('load',()=>{drawIcons()});
+})();
+</script>
+</body>
+</html>
